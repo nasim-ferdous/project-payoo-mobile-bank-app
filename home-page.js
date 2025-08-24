@@ -1,3 +1,7 @@
+const validPin = 1234;
+const transactionData = [];
+const validCoupon = 12345;
+
 // reusable function
 // function to get input values
 function getInputValueNumber(id) {
@@ -31,7 +35,6 @@ function handleToggle(id) {
   const forms = document.getElementsByClassName("form");
 
   for (const form of forms) {
-    console.log(form);
     form.style.display = "none";
   }
   document.getElementById(id).style.display = "block";
@@ -51,8 +54,6 @@ function handleToggleButton(id) {
     .classList.add("border-[#0874f2]", "bg-[#0874f20d]");
 }
 
-const validPin = 1234;
-
 // add money feature
 document
   .getElementById("add-money-btn")
@@ -65,6 +66,11 @@ document
 
     // const addAmount = parseInt(document.getElementById("add-amount").value);
     const addAmount = getInputValueNumber("add-amount"); // using reusable function
+
+    if (addAmount <= 0) {
+      alert("invalid amount");
+      return;
+    }
 
     // const addPin = parseInt(document.getElementById("add-pin").value);
     const addPin = getInputValueNumber("add-pin");
@@ -90,6 +96,14 @@ document
     // document.getElementById("available-balance").innerText =
     //   totalAvailableBalance;
     setInnerText(totalAvailableBalance);
+
+    const data = {
+      name: "Add Money",
+      date: new Date().toLocaleTimeString(),
+    };
+
+    transactionData.push(data);
+    // console.log(transactionData);
   });
 
 // Cash Out feature
@@ -104,6 +118,11 @@ document
     //   document.getElementById("available-balance").innerText
     // );
     const availableBalance = getTextValue("available-balance");
+
+    if (amount <= 0 || amount > availableBalance) {
+      alert("invalid amount");
+      return;
+    }
 
     // const agentNumber = document.getElementById("agent-number").value;
     const agentNumber = getInputValue("agent-number");
@@ -125,6 +144,143 @@ document
     // document.getElementById("available-balance").innerText =
     //   newAvailableBalance;
     setInnerText(newAvailableBalance);
+
+    const data = {
+      name: "Cash Out",
+      date: new Date().toLocaleTimeString(),
+    };
+
+    transactionData.push(data);
+    console.log(transactionData);
+  });
+
+// transfer money feature
+document
+  .getElementById("transfer-money-btn")
+  .addEventListener("click", function (event) {
+    event.preventDefault();
+    const amount = getInputValueNumber("transfer-amount");
+    const availableBalance = getTextValue("available-balance");
+    if (amount <= 0 || amount > availableBalance) {
+      alert("invalid amount");
+      return;
+    }
+
+    const userAccountNumber = getInputValue("transfer-number");
+
+    const transferPIn = getInputValueNumber("transfer-pin");
+    if (userAccountNumber.length !== 11) {
+      alert("invalid Account number");
+      return;
+    }
+    if (transferPIn !== validPin) {
+      alert("invalid pin number");
+      return;
+    }
+
+    const transferAvailableBalance = availableBalance - amount;
+
+    setInnerText(transferAvailableBalance);
+
+    const data = {
+      name: "Transfer Money",
+      date: new Date().toLocaleTimeString(),
+    };
+
+    transactionData.push(data);
+    console.log(transactionData);
+  });
+
+// get bonus feature
+document
+  .getElementById("bonus-coupon-btn")
+  .addEventListener("click", function (event) {
+    event.preventDefault();
+    const coupon = getInputValueNumber("bonus-coupon");
+    const availableBalance = getTextValue("available-balance");
+
+    if (coupon !== validCoupon) {
+      alert("Invalid coupon number");
+      return;
+    }
+    const bonusAvailableBalance = availableBalance + 5000;
+    setInnerText(bonusAvailableBalance);
+
+    const data = {
+      name: "Get bonus",
+      date: new Date().toLocaleTimeString(),
+    };
+
+    transactionData.push(data);
+    console.log(transactionData);
+  });
+
+// pay bill feature
+
+document
+  .getElementById("pay-button")
+  .addEventListener("click", function (event) {
+    event.preventDefault();
+    const bank = document.getElementById("pay-bill-bank").value;
+    const accountNumber = getInputValue("pay-bill-account-number");
+    const amount = getInputValueNumber("pay-bill-amount");
+
+    const availableBalance = getTextValue("available-balance");
+    if (amount <= 0 || amount > availableBalance) {
+      alert("Invalid amount");
+      return;
+    }
+    const payPin = getInputValueNumber("pay-bill-pin");
+
+    if (accountNumber.length !== 11) {
+      alert("Invalid Account Number");
+      return;
+    }
+
+    if (payPin !== validPin) {
+      alert("Invalid Pin Number ");
+    }
+
+    const payAvailableBalance = availableBalance - amount;
+    setInnerText(payAvailableBalance);
+
+    const data = {
+      name: "Pay Bill",
+      date: new Date().toLocaleTimeString(),
+    };
+
+    transactionData.push(data);
+    console.log(transactionData);
+  });
+
+// transaction feature
+document
+  .getElementById("transaction-button")
+  .addEventListener("click", function () {
+    const transactionContainer = document.getElementById(
+      "transaction-container"
+    );
+    transactionContainer.innerText = "";
+    for (const data of transactionData) {
+      const div = document.createElement("div");
+      div.innerHTML = `
+      <div
+            class="flex justify-between items-center bg-white rounded-xl p-3 mt-3"
+          >
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-[#f4f5f7]">
+                <img src="./assets/wallet1.png" alt="" class="" />
+              </div>
+              <div class="ml-3">
+                <h1>${data.name}</h1>
+                <p>${data.date}</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </div>
+      `;
+      transactionContainer.appendChild(div);
+    }
   });
 
 // toggling feature
@@ -259,3 +415,19 @@ document.getElementById("bonus-button").addEventListener("click", function () {
   // with reusable function
   handleToggleButton("bonus-button");
 });
+
+// for pay bill button
+document
+  .getElementById("pay-bill-button")
+  .addEventListener("click", function () {
+    handleToggle("pay-bill-parent");
+    handleToggleButton("pay-bill-button");
+  });
+
+// for transaction button
+document
+  .getElementById("transaction-button")
+  .addEventListener("click", function () {
+    handleToggle("transaction-parent");
+    handleToggleButton("transaction-button");
+  });
